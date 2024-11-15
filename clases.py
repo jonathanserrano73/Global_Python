@@ -8,7 +8,7 @@ class Detector:
         self.posicion_mutante=[]
     
     def detectar_mutantes (self):
-        if self.detectar_horizontal() or self.detectar_vertical() or self.detectar_diagonal():
+        if self.detectar_horizontal()==True or self.detectar_vertical()==True or self.detectar_diagonal()==True:
             return True
         else:
             return False
@@ -169,41 +169,18 @@ class Sanador(Detector):
    
     def __init__(self, matriz_adn):
         super().__init__(matriz_adn)
-        
+        self.lista_bases=['A','G','C','T']
     
     def sanar_mutantes(self):
-        lista_bases=['A','G','C','T']
-        
-        while self.detectar_mutantes()==True:
-            if not self.detectar_mutantes():
-                break
-            if self.detectar_horizontal():
-                fila_inicial,columna_inicial=self.posicion_mutante[0]
+        if self.detectar_mutantes()==True:
+            print("La Secuencia de ADN contiene mutaciones, comienza la curación")
+            print("")
+            while True:
+                self.matriz_adn=[[random.choice(self.lista_bases) for i in range(6)] for i in range(6)]
+                if self.detectar_mutantes() == False:
+                    print("Secuencia curada con exito")
+                    return self.matriz_adn
+                else:
+                    print("La matriz sigue teniendo mutaciones, generando un nuevo ADN...")
+ 
 
-                fila_mutada=list(self.matriz_adn[fila_inicial])
-                for i in range (columna_inicial,columna_inicial+4):
-                    fila_mutada[i]=random.choice(lista_bases)
-                self.matriz_adn[fila_inicial]=''.join(fila_mutada)
-                self.posicion_mutante.pop(0)
-                
-            elif self.detectar_vertical():
-                fila_inicial,columna_inicial=self.posicion_mutante[0]
-
-                for i in range(fila_inicial,fila_inicial+4):
-                    fila_mutada=list(self.matriz_adn[i])
-                    fila_mutada[columna_inicial]=random.choice(lista_bases)
-                    self.matriz_adn[i]=''.join(fila_mutada)
-                self.posicion_mutante.pop(0)
-                
-            elif self.detectar_diagonal():
-                fila_inicial,columna_inicial=self.posicion_mutante[0]
-
-                for i in range(4):
-                    fila=fila_inicial+i
-                    columna=columna_inicial+i
-                    fila_mutada=list(self.matriz_adn[fila])
-                    fila_mutada[columna]=random.choice(lista_bases)
-                    self.matriz_adn[fila]=''.join(fila_mutada)
-                self.posicion_mutante.pop(0)                
-            
-        return self.matriz_adn
