@@ -1,21 +1,27 @@
 import random
 
 class Detector:
+    '''
+    Esta clase se encarga de detectar mutaciones en una matriz de ADN
+    Un mutante se puede presentar en una secuencia horizontal, vertical,
+    diagonal en la matriz que proporsiona el usuario
+    '''
+    def __init__(self,matriz_adn:list[str]):
+        self.matriz_adn=matriz_adn #matriz de ADN mutante
+        self.tamaño=len(matriz_adn)  #Tamaño de la matriz
+        self.posicion_mutante=[]  # Lista que guardara la posicion de la mutacion
     
-    def __init__(self,matriz_adn):
-        self.matriz_adn=matriz_adn
-        self.tamaño=len(matriz_adn)
-        self.posicion_mutante=[]
-    
-    def detectar_mutantes (self):
+    def detectar_mutantes (self)-> bool: 
         if self.detectar_horizontal()==True or self.detectar_vertical()==True or self.detectar_diagonal()==True:
             return True
         else:
             return False
             
-    def detectar_horizontal(self):
+    def detectar_horizontal(self)-> bool:
+        '''Metodo que detecta si hay mutacion en secuencia horizontal revisando fila por fila
+        y retorna True si la encuentra'''
         for fila_inicio,bases in enumerate(self.matriz_adn):
-            contador=0
+            contador=0      #Variable que acumula la cantidad de repeticiones
             base_anterior=None
             for columna_inicio, base in enumerate(bases):
                 if base==base_anterior:
@@ -29,8 +35,10 @@ class Detector:
         return False
                     
                 
-    def detectar_vertical(self):
-        filas=self.tamaño #son la cantidad de elementos de la matriz
+    def detectar_vertical(self)-> bool:
+        '''Metodo que revisa si hay una mutacion en secuencia vertical que revisa por columna en la matriz
+        y retorna True si encuentra la mutación'''
+        filas=self.tamaño #Cantidad de elementos de la matriz
         columnas=len(self.matriz_adn[0]) #La cantidad de bases de el elemento son las columnas
         
         for columna in range(columnas):
@@ -50,10 +58,12 @@ class Detector:
         return False
                 
         
-    def detectar_diagonal(self):
+    def detectar_diagonal(self)-> bool:
+        '''Metodo que revisa si hay repeticiones diagonales de izquierda a derecha y
+        retora True si encuentra una mutacion'''
         filas=self.tamaño
         columnas=len(self.matriz_adn[0])
-        '''Revisa si hay repeticiones diagonales de izquierda a derecha'''
+        
         for columna_inicial in range(columnas):
             contador_bases=0
             base_anterior=None
@@ -73,6 +83,10 @@ class Detector:
                         return True
                     
         for columna_inicial in reversed(range(columnas)):
+            '''
+            Bucle que recorre la lista en reversa para detectar mutante de derecha
+            a izquierda y retorna True si encuentra alguna mutación.
+            '''
             contador_bases=0
             base_anterior=None
             for i in range(filas):
@@ -89,46 +103,54 @@ class Detector:
         return False                    
     
 class Mutador:
+    '''Clase que se encarga de mutar una matriz de ADN proporcionada por el usuario
     
-    def __init__(self,matriz_adn,base_nitrogenada,posicion_inicial):
+    Recibe:
+    - Matriz de ADN que sera la que va a recibir la mutación,
+    - Base nitrogenada que sera la que se repita en la matriz,
+    - Posicion donde se insertara la mutación'''
+    def __init__(self,matriz_adn:list[str],base_nitrogenada: str,posicion_inicial:tuple[int,int]):
         self.matriz_adn=matriz_adn
         self.base_nitrogenada=base_nitrogenada
         self.posicion_inicial=posicion_inicial
-        self.tamaño=len(self.matriz_adn)
     
-    def crear_mutante(self):
+    def crear_mutante(self)->list[str]:
         pass
     
 class Radiacion(Mutador):
-    
-    def __init__(self,matriz_adn,base_nitrogenada,posicion_inicial,tamaño, orientacion_de_la_mutacion):
-        super().__init__(matriz_adn,base_nitrogenada,posicion_inicial, tamaño)
-        self.orientacion_de_la_mutacion=orientacion_de_la_mutacion
+    '''Subclase de Mutador que genera mutaciones en forma horizontal o vertical
+    Recibe la orientacion de la mutación que indica si se quiere insertar de manera "H o V" (horizontal o vertical)
+    '''
+    def __init__(self,matriz_adn:list[str],base_nitrogenada:str,posicion_inicial:tuple[int,int], orientacion_de_la_mutacion:str):
+        super().__init__(matriz_adn,base_nitrogenada,posicion_inicial)
         
-    def crear_mutante(self):
+        self.tamaño=len(matriz_adn)
+        self.orientacion_de_la_mutacion=orientacion_de_la_mutacion  #Orientacion en la que se quiere insertar la mutación
+        
+    def crear_mutante(self)->list[str]:
         
         try:
             fila_inicial,columna_inicial=self.posicion_inicial
             if not (0<=fila_inicial<self.tamaño and 0<=columna_inicial<len(self.matriz_adn[0])):
                 raise ValueError("La posicion inicial esta fuera de los limites de la matriz")
             if self.orientacion_de_la_mutacion=="H":
-                if fila_inicial<self.tamaño:
+                if fila_inicial<self.tamaño:    
                     '''Revisamos si hay espacio para la mutacion'''
                     if columna_inicial+3 <len(self.matriz_adn[fila_inicial]):
                         fila_mutada=list(self.matriz_adn[fila_inicial])  #convierte la fila en una lista
                         '''Remplaza las bases con la base indicada'''
-                        fila_mutada[columna_inicial:columna_inicial+4]=[self.base_nitrogenada]*4
-                        self.matriz_adn[fila_inicial]=''.join(fila_mutada)
+                        fila_mutada[columna_inicial:columna_inicial+4]=[self.base_nitrogenada]*4    #Introduce la mutación
+                        self.matriz_adn[fila_inicial]=''.join(fila_mutada)  #Vuelve a convertir la fila en un String 
                     else:
                         raise ValueError ("No hay suficiente espacio en la fila para añadir mutación")
             elif self.orientacion_de_la_mutacion=="V":
-                if fila_inicial<self.tamaño and columna_inicial<len(self.matriz_adn[fila_inicial]):
+                if fila_inicial<self.tamaño and columna_inicial<len(self.matriz_adn[fila_inicial]):  #Revisa si hay espacio en la matriz para introducir la mutacion
                     
                     if fila_inicial+3 <self.tamaño:
                         for i in range(4):
                             fila_mutada=list(self.matriz_adn[fila_inicial+i])
-                            fila_mutada[columna_inicial]=self.base_nitrogenada
-                            self.matriz_adn[fila_inicial+i]=''.join(fila_mutada)
+                            fila_mutada[columna_inicial]=self.base_nitrogenada      #Introduce la mutacion en la columna
+                            self.matriz_adn[fila_inicial+i]=''.join(fila_mutada)    #Vuelve a convertir la lista en un string
                     else:
                         raise ValueError("No hay suficiente espacio en la columna para añadir mutación")
             else:
@@ -141,11 +163,15 @@ class Radiacion(Mutador):
         
 
 class Virus(Mutador):
-    base_nitrogenada=""
-    def __init__(self,matriz_adn, posicion_inicial, base_nitrogenada,tamaño):
-        super().__init__(matriz_adn, posicion_inicial, base_nitrogenada, tamaño)
+    '''Subclase de Mutador que genera mutantes en secuencia diagonal,
     
-    def crear_mutante(self, base_nitrogenada, posicion_inicial):
+    '''
+    def __init__(self,matriz_adn:list[str], posicion_inicial:tuple[int,int], base_nitrogenada:str):
+        super().__init__(matriz_adn, posicion_inicial, base_nitrogenada)
+        self.tamaño=len(matriz_adn)
+
+    
+    def crear_mutante(self, base_nitrogenada:str, posicion_inicial:tuple[int,int]):
 
         try:
             fila_inicial,columna_inicial=posicion_inicial
@@ -166,12 +192,14 @@ class Virus(Mutador):
             return None
 
 class Sanador(Detector):
-   
-    def __init__(self, matriz_adn):
+    '''Subclase de Detector que sanara las matrices de ADN si presentan alguna mutacion,
+    Recibe una matriz mutada, genera una nueva matriz de ADN y la revisa hasta generar una sin ninguna mutación 
+    '''
+    def __init__(self, matriz_adn:list[str]):
         super().__init__(matriz_adn)
-        self.lista_bases=['A','G','C','T']
+        self.lista_bases=['A','G','C','T']  #bases que se usaran de manera aleatoria para sanar al mutante
     
-    def sanar_mutantes(self):
+    def sanar_mutantes(self)->list[str]:
         if self.detectar_mutantes()==True:
             print("La Secuencia de ADN contiene mutaciones, comienza la curación")
             print("")
