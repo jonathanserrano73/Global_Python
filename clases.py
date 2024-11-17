@@ -11,6 +11,7 @@ class Detector:
         self.tamaño=len(matriz_adn)  #Tamaño de la matriz
         self.posicion_mutante=[]  # Lista que guardara la posicion de la mutacion
     
+            
     def detectar_mutantes (self)-> bool: 
         if self.detectar_horizontal()==True or self.detectar_vertical()==True or self.detectar_diagonal()==True:
             return True
@@ -21,7 +22,7 @@ class Detector:
         '''Metodo que detecta si hay mutacion en secuencia horizontal revisando fila por fila
         y retorna True si la encuentra'''
         for fila_inicio,bases in enumerate(self.matriz_adn):
-            contador=0      #Variable que acumula la cantidad de repeticiones
+            contador=1      #Variable que acumula la cantidad de repeticiones
             base_anterior=None
             for columna_inicio, base in enumerate(bases):
                 if base==base_anterior:
@@ -42,7 +43,7 @@ class Detector:
         columnas=len(self.matriz_adn[0]) #La cantidad de bases de el elemento son las columnas
         
         for columna in range(columnas):
-            contador_bases=0
+            contador_bases=1
             base_anterior=None
             for fila in range(filas):
                 base=self.matriz_adn[fila][columna]
@@ -65,7 +66,7 @@ class Detector:
         columnas=len(self.matriz_adn[0])
         
         for columna_inicial in range(columnas):
-            contador_bases=0
+            contador_bases=1
             base_anterior=None
             for i in range(filas):
                 '''Recorre desde la columna inicial y va pasando a 
@@ -87,7 +88,7 @@ class Detector:
             Bucle que recorre la lista en reversa para detectar mutante de derecha
             a izquierda y retorna True si encuentra alguna mutación.
             '''
-            contador_bases=0
+            contador_bases=1
             base_anterior=None
             for i in range(filas):
                 if columna_inicial-i>=0:
@@ -102,6 +103,9 @@ class Detector:
                         return True
         return False                    
     
+    def imprimir_matriz(self):
+        for fila in self.matriz_adn:
+            print(fila)
 class Mutador:
     '''Clase que se encarga de mutar una matriz de ADN proporcionada por el usuario
     
@@ -117,6 +121,9 @@ class Mutador:
     def crear_mutante(self)->list[str]:
         pass
     
+    def imprimir_matriz(self):
+        for fila in self.matriz_adn:
+            print(fila)
 class Radiacion(Mutador):
     '''Subclase de Mutador que genera mutaciones en forma horizontal o vertical
     Recibe la orientacion de la mutación que indica si se quiere insertar de manera "H o V" (horizontal o vertical)
@@ -155,7 +162,8 @@ class Radiacion(Mutador):
                         raise ValueError("No hay suficiente espacio en la columna para añadir mutación")
             else:
                 raise ValueError ("Error, orientacion no valida, debe ingresar 'H' o 'V'")
-            
+        
+            print("\nADN despues de la mutación")
             return self.matriz_adn
         except ValueError as e:
             print(f"Error {e}")
@@ -166,26 +174,27 @@ class Virus(Mutador):
     '''Subclase de Mutador que genera mutantes en secuencia diagonal,
     
     '''
-    def __init__(self,matriz_adn:list[str], posicion_inicial:tuple[int,int], base_nitrogenada:str):
-        super().__init__(matriz_adn, posicion_inicial, base_nitrogenada)
+    def __init__(self,matriz_adn:list[str], base_nitrogenada:str, posicion_inicial:tuple[int,int]):
+        super().__init__(matriz_adn, base_nitrogenada, posicion_inicial)
         self.tamaño=len(matriz_adn)
 
     
-    def crear_mutante(self, base_nitrogenada:str, posicion_inicial:tuple[int,int]):
+    def crear_mutante(self):
 
         try:
-            fila_inicial,columna_inicial=posicion_inicial
+            fila_inicial,columna_inicial=self.posicion_inicial
             
-            if not (0<=fila_inicial<self.tamaño and 0<=columna_inicial<len(self.matriz_adn[0])):                        
-                raise ValueError("La posicion inicial esta fuera de los limites de la matriz")
+            if fila_inicial+3>self.tamaño or columna_inicial+3>len(self.matriz_adn[0]):  
+                raise ValueError("No hay suficiente espacio en la fila o columna para añadir la mutación")
 
-            for i in range(self.tamaño):
+            for i in range(4):
                 fila=fila_inicial+i
                 columna=columna_inicial+i
-                if fila<self.tamaño or columna<len(self.matriz_adn[0]):
-                    raise ValueError("No hay suficiente espacio en la fila o columna para añadir la mutación")
-                
-                self.matriz_adn[fila][columna]=base_nitrogenada
+                if fila<self.tamaño and columna<len(self.matriz_adn[0]):
+                    fila_mutada=list(self.matriz_adn[fila])
+                    fila_mutada[columna]=self.base_nitrogenada                
+                    self.matriz_adn[fila]=''.join(fila_mutada)
+            print("\nADN despues de la mutación")
             return self.matriz_adn        
         except ValueError as e:
             print(f"Error {e}")
@@ -201,14 +210,16 @@ class Sanador(Detector):
     
     def sanar_mutantes(self)->list[str]:
         if self.detectar_mutantes()==True:
-            print("La Secuencia de ADN contiene mutaciones, comienza la curación")
+            print("\nLa Secuencia de ADN contiene mutaciones, comienza la curación")
             print("")
             while True:
-                self.matriz_adn=[[random.choice(self.lista_bases) for i in range(6)] for i in range(6)]
+                self.matriz_adn=[''.join(random.choice(self.lista_bases) for i in range(6)) for i in range(6)]
                 if self.detectar_mutantes() == False:
-                    print("Secuencia curada con exito")
+                    print("\nSecuencia curada con exito")
                     return self.matriz_adn
                 else:
-                    print("La matriz sigue teniendo mutaciones, generando un nuevo ADN...")
- 
+                    print("\nLa matriz sigue teniendo mutaciones, generando un nuevo ADN...")
+    def imprimir_matriz(self):
+        for fila in self.matriz_adn:
+            print(fila)
 
