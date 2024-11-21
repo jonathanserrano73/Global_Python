@@ -46,6 +46,7 @@ def mutar_adn(matriz_adn):
         mutador=Radiacion(matriz_adn,base_nitrogenada, (fila,col), "V")
     elif opcion==3:
         mutador=Virus(matriz_adn,base_nitrogenada,(fila,col))
+
     else:
         print("Opcion no valida. Por favor ingreese (1, 2 o 3)")
         return matriz_adn 
