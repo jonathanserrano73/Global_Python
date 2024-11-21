@@ -184,8 +184,10 @@ class Virus(Mutador):
         try:
             fila_inicial,columna_inicial=self.posicion_inicial
             
-            if fila_inicial+3>self.tamaño or columna_inicial+3>len(self.matriz_adn[0]):  
+            if fila_inicial+3>self.tamaño or columna_inicial+3>len(self.matriz_adn[0]):
+
                 raise ValueError("No hay suficiente espacio en la fila o columna para añadir la mutación")
+                
 
             for i in range(4):
                 fila=fila_inicial+i
